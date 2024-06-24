@@ -1,0 +1,32 @@
+stages:
+  - test
+
+variables:
+  ALLURE_LAUNCH_NAME: "${CI_PROJECT_NAME} - ${CI_COMMIT_SHORT_SHA}"
+  ALLURE_LAUNCH_TAGS: "js, playwright"
+  ALLURE_ENDPOINT: https://demo.testops.cloud/
+  ALLURE_PROJECT_ID: 338
+  ALLURE_RESULTS: "allure-results"
+  TESTS_ENDPOINT: "https://demo.testops.cloud"
+  TESTS_BROWSER: "opera"
+  TESTS_BRANCH: ${CI_COMMIT_REF_NAME}
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - when: always
+
+
+test:
+  image: mcr.microsoft.com/playwright:bionic
+  stage: test
+  before_script:
+    - wget https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64 -O ./allurectl
+    - chmod +x ./allurectl
+    - npm i
+    - npx playwright install
+    
+  script:
+    - ./allurectl watch -- npm test
+    - printenv | grep "ALLURE_"
